@@ -181,9 +181,6 @@ export default function AgentStudio() {
   };
 
   const generateAgentResponse = async (agentType: AgentType, userInput: string, context: string): Promise<string> => {
-    // Import dynamically to avoid SSR issues
-    const { generateAgentResponse: callGemini } = await import('@/utils/gemini');
-
     // Convert messages to history format
     const history = messages.map(msg => ({
       role: msg.role,
@@ -191,10 +188,28 @@ export default function AgentStudio() {
     }));
 
     try {
-      const response = await callGemini(agentType, userInput, context, history);
-      return response;
+      // Call server-side API endpoint
+      const response = await fetch('/api/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          agentType,
+          userMessage: userInput,
+          pageContext: context,
+          conversationHistory: history
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.response;
     } catch (error) {
-      console.error('Error calling Gemini:', error);
+      console.error('Error calling Agent API:', error);
       return `⚠️ Sorry, I encountered an error. Please try again.\n\nError: ${error.message}`;
     }
   };

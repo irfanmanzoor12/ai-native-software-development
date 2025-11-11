@@ -1,13 +1,13 @@
 /**
- * Agent Studio API - Gemini Integration
+ * Agent Studio API - Vercel Serverless Function
  *
- * This API route handles requests from the Agent Studio chat interface
- * and communicates with Google's Gemini AI to generate responses.
+ * Server-side endpoint for Agent Studio chat interface
+ * Integrates with Google's Gemini AI (free tier)
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Agent-specific system prompts
+// Agent-specific system prompts aligned with book content
 const AGENT_PROMPTS = {
   storytelling: `You are the Storyteller - an expert at explaining AI-native development concepts through engaging stories, analogies, and real-world examples.
 
@@ -62,9 +62,7 @@ Example visualizations:
 - "Circular flow diagram: Specify → AI Generates → Human Validates → Refine Spec → Repeat"
 - "System architecture: Python reasoning layer + TypeScript UI layer + AI agent orchestration"
 
-Note: Describe images in vivid detail. Future integration will generate actual images.
-
-Style: Visual, descriptive, and instructional. Make abstract concepts concrete through imagery.`,
+Style: Visual, descriptive, and instructional. Make abstract concepts concrete through imagery. Use emojis when helpful.`,
 
   mindmap: `You are the Mind Mapper - an AI that visualizes AI-native development concepts and book structure using Mermaid diagram syntax.
 
@@ -84,9 +82,9 @@ Key concepts to map:
 - Technology stack: Python (reasoning) + TypeScript (interaction) + AI Agents (orchestration)
 - Role transformation: Coder → Architect → Validator
 
-Output format: Always include valid Mermaid.js syntax in a code block. Keep diagrams clear (max 10-15 nodes).
+Output format: Always wrap mermaid code in triple backticks with 'mermaid' language tag. Keep diagrams clear (max 10-15 nodes).
 
-Example structures:
+Example:
 \`\`\`mermaid
 graph TD
   A[AI-Native Development] --> B[Specification-First]
@@ -126,25 +124,74 @@ TARGET AUDIENCE: Students, self-learners, developers, educators, entrepreneurs (
 Keep all responses aligned with this AI-native, specification-first philosophy.
 `;
 
-export async function generateAgentResponse(
-  agentType: 'storytelling' | 'coach' | 'image' | 'mindmap',
-  userMessage: string,
-  pageContext: string,
-  conversationHistory: Array<{ role: string; content: string }> = []
-): Promise<string> {
+interface RequestBody {
+  agentType: 'storytelling' | 'coach' | 'image' | 'mindmap';
+  userMessage: string;
+  pageContext?: string;
+  conversationHistory?: Array<{ role: string; content: string }>;
+}
 
-  // Get API key from environment
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    return "⚠️ API key not configured. Please add GEMINI_API_KEY to your environment variables.\n\n" +
-           "Get your free API key from: https://aistudio.google.com/app/apikey";
+export default async function handler(req: Request): Promise<Response> {
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try {
+    const body: RequestBody = await req.json();
+    const { agentType, userMessage, pageContext = '', conversationHistory = [] } = body;
+
+    // Validate required fields
+    if (!agentType || !userMessage) {
+      return new Response(JSON.stringify({ error: 'Missing required fields: agentType, userMessage' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Get API key from environment (server-side only)
+    const apiKey = process.env.GEMINI_API_KEY || process.env.DOCUSAURUS_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return new Response(JSON.stringify({
+        response: `⚠️ **API Key Not Configured**
+
+To use Agent Studio, you need a free Google Gemini API key.
+
+**Local development:**
+1. Get your free API key: https://aistudio.google.com/app/apikey
+2. Create \`.env.local\` in the project root
+3. Add: \`GEMINI_API_KEY=your_api_key_here\`
+4. Restart the dev server
+
+**Vercel deployment:**
+1. Go to your Vercel project dashboard
+2. Settings → Environment Variables
+3. Add: \`GEMINI_API_KEY\` = your_api_key_here
+4. Redeploy
+
+**Free tier:** 15 requests/minute, 1,500/day - no credit card needed!`
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use gemini-2.5-flash-lite (65K tokens, lighter, less crowded, FREE)
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+      generationConfig: {
+        temperature: 0.9,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 4096, // Increased for longer responses
+      }
+    });
 
     // Build the full prompt
     const systemPrompt = AGENT_PROMPTS[agentType] + "\n\n" + BOOK_CONTEXT;
@@ -153,56 +200,53 @@ export async function generateAgentResponse(
       ? `\n\nCurrent page context:\n${pageContext}\n\n`
       : '';
 
-    const fullPrompt = `${systemPrompt}${contextPrompt}User question: ${userMessage}`;
+    // Add conversation history for context
+    let historySection = '';
+    if (conversationHistory.length > 0) {
+      historySection = '\n\n=== CONVERSATION HISTORY ===\n';
+      conversationHistory.slice(-4).forEach(msg => {
+        historySection += `${msg.role === 'user' ? 'User' : 'Agent'}: ${msg.content}\n`;
+      });
+      historySection += '=== END HISTORY ===\n';
+    }
+
+    const fullPrompt = `${systemPrompt}${contextPrompt}${historySection}\n\nUser: ${userMessage}\n\nAgent:`;
 
     // Generate response
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
 
-    return text;
-
-  } catch (error) {
-    console.error('Gemini API Error:', error);
-
-    if (error.message?.includes('API key')) {
-      return "⚠️ Invalid API key. Please check your GEMINI_API_KEY environment variable.\n\n" +
-             "Get a free API key from: https://aistudio.google.com/app/apikey";
-    }
-
-    return `⚠️ Sorry, I encountered an error: ${error.message}\n\nPlease try again.`;
-  }
-}
-
-// Export for browser-side usage
-export default async function handler(req: Request): Promise<Response> {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
-
-  try {
-    const body = await req.json();
-    const { agentType, userMessage, pageContext, conversationHistory } = body;
-
-    if (!agentType || !userMessage) {
-      return new Response('Missing required fields', { status: 400 });
-    }
-
-    const response = await generateAgentResponse(
-      agentType,
-      userMessage,
-      pageContext,
-      conversationHistory
-    );
-
-    return new Response(JSON.stringify({ response }), {
+    return new Response(JSON.stringify({ response: text }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('API Handler Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    console.error('Gemini API Error:', error);
+
+    let errorMessage = `⚠️ **Error:** ${error.message}`;
+
+    if (error.message?.includes('API key') || error.message?.includes('invalid')) {
+      errorMessage = `⚠️ **Invalid API Key**
+
+Please check your API key configuration:
+- Local: \`.env.local\` file with \`GEMINI_API_KEY\`
+- Vercel: Environment variable in project settings
+
+Get a free key: https://aistudio.google.com/app/apikey`;
+    }
+
+    if (error.message?.includes('quota') || error.message?.includes('rate limit')) {
+      errorMessage = `⚠️ **Rate Limit Reached**
+
+Free tier limit: 15 requests/minute, 1,500/day
+
+Please wait a moment and try again.`;
+    }
+
+    return new Response(JSON.stringify({ response: errorMessage }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   }

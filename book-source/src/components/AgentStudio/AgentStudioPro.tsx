@@ -144,15 +144,40 @@ export default function AgentStudioPro() {
     setIsTyping(true);
 
     try {
-      // Import Gemini dynamically
-      const { generateAgentResponse: callGemini } = await import('@/utils/gemini');
-
+      // Try server-side API first (Vercel production)
       const history = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
 
-      const response = await callGemini(selectedAgent, userInput, pageContext, history);
+      let response: string;
+
+      try {
+        const apiResponse = await fetch('/api/agent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            agentType: selectedAgent,
+            userMessage: userInput,
+            pageContext: pageContext,
+            conversationHistory: history
+          })
+        });
+
+        if (apiResponse.ok) {
+          const data = await apiResponse.json();
+          response = data.response;
+        } else {
+          throw new Error('API not available');
+        }
+      } catch (apiError) {
+        // Fallback to client-side Gemini (local dev)
+        console.log('API unavailable, using client-side fallback...');
+        const { generateAgentResponse: callGemini } = await import('@/utils/gemini');
+        response = await callGemini(selectedAgent, userInput, pageContext, history);
+      }
 
       setIsTyping(false);
 

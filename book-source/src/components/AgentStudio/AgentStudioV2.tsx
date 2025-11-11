@@ -159,15 +159,31 @@ export default function AgentStudioV2() {
     setIsTyping(true);
 
     try {
-      // Import Gemini dynamically
-      const { generateAgentResponse: callGemini } = await import('@/utils/gemini');
-
+      // Call server-side API endpoint
       const history = messages.map(msg => ({
         role: msg.position === 'right' ? 'user' : 'agent',
         content: msg.text
       }));
 
-      const response = await callGemini(selectedAgent, userInput, pageContext, history);
+      const apiResponse = await fetch('/api/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          agentType: selectedAgent,
+          userMessage: userInput,
+          pageContext: pageContext,
+          conversationHistory: history
+        })
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`API error: ${apiResponse.status}`);
+      }
+
+      const data = await apiResponse.json();
+      const response = data.response;
 
       setIsTyping(false);
 
