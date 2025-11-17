@@ -1,49 +1,51 @@
 .toggleContainer {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 24px;
-  margin: 32px 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .toggleHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .settingsIcon {
-  font-size: 24px;
+  font-size: 16px;
 }
 
 .title {
   margin: 0;
   color: white;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .toggleButtons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .toggleButton {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  padding: 20px;
+  gap: 6px;
+  padding: 8px 16px;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
+  flex: 1;
+  min-width: 120px;
+  justify-content: center;
 }
 
 .toggleButton:hover {
@@ -60,63 +62,48 @@
 }
 
 .buttonIcon {
-  font-size: 28px;
+  font-size: 18px;
 }
 
 .buttonText {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0;
 }
 
 .buttonDescription {
-  font-size: 12px;
-  opacity: 0.9;
-  text-align: center;
+  display: none; /* Hide descriptions for compact view */
 }
 
 .modeDescription {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 16px;
-  color: white;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.modeDescription p {
-  margin: 0;
-}
-
-.modeDescription strong {
-  font-weight: 600;
+  display: none; /* Hide for compact view */
 }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
   .toggleButtons {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .toggleButton {
+    min-width: 100%;
   }
 
   .toggleContainer {
-    padding: 16px;
-    margin: 16px 0;
+    padding: 10px 12px;
+    margin: 12px 0;
   }
 
   .title {
-    font-size: 18px;
+    font-size: 13px;
   }
 
   .buttonIcon {
-    font-size: 24px;
+    font-size: 16px;
   }
 
   .buttonText {
-    font-size: 14px;
-  }
-
-  .buttonDescription {
-    font-size: 11px;
+    font-size: 13px;
   }
 }
 

@@ -46,8 +46,18 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
       setError(null);
 
       try {
-        // TODO: Replace with actual API endpoint
-        // For now, this is a placeholder
+        // Extract the actual markdown content from the page
+        const contentElement = document.querySelector('article.markdown') ||
+                              document.querySelector('.markdown') ||
+                              document.querySelector('main');
+
+        if (!contentElement) {
+          throw new Error('Could not find lesson content on page');
+        }
+
+        // Get text content (not HTML) for better AI processing
+        const originalContent = contentElement.textContent || contentElement.innerHTML;
+
         const response = await fetch('/api/content/transform', {
           method: 'POST',
           headers: {
@@ -56,22 +66,34 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
           body: JSON.stringify({
             mode,
             lessonPath: lessonPath || window.location.pathname,
-            originalContent: document.querySelector('.markdown')?.innerHTML || '',
+            originalContent: originalContent.trim(),
+            professionalBackground: 'General', // TODO: Get from user profile
           }),
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
+
+        // Check if API key is not configured
+        if (data.error === 'API_KEY_NOT_CONFIGURED') {
+          setError(data.content);
+          return;
+        }
+
+        if (data.error === 'GENERATION_FAILED') {
+          setError(data.content);
+          return;
+        }
+
         setTransformedContent(data.content);
       } catch (err) {
         console.error('Failed to fetch transformed content:', err);
         setError(
-          mode === 'summary'
-            ? '⚠️ Summary mode requires authentication. Please sign up to unlock this feature.'
-            : '⚠️ Personalized mode requires authentication. Please sign up and set your professional background.'
+          `⚠️ ${err.message || 'Failed to generate content. Please try again.'}`
         );
       } finally {
         setIsLoading(false);
@@ -143,7 +165,9 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
         <div className={styles.modeBadge}>
           {mode === 'summary' ? '⚡ Summary Mode' : '🎯 Personalized Mode'}
         </div>
-        <div dangerouslySetInnerHTML={{ __html: transformedContent }} />
+        <div className="markdown">
+          <div dangerouslySetInnerHTML={{ __html: transformedContent }} />
+        </div>
       </div>
     );
   }
