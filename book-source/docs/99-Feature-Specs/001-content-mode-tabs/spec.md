@@ -53,14 +53,14 @@ This is the detailed 864-line specification document. For a quicker overview, se
 
 **Independent Test**:
 1. Deploy Summary mode only (no Personalization yet)
-2. User signs up → clicks "Summary" tab → sees condensed content in <8 seconds
+2. User signs up → clicks "Summary" tab → sees condensed content in &lt;8 seconds
 3. **Delivers value**: User reviews full chapter in 1/3 the time
 
 **Acceptance Scenarios**:
 
 1. **Given** user is signed in and viewing any lesson page,
    **When** user clicks "Summary" tab,
-   **Then** AI-generated summary appears within 8 seconds (first-time) or <200ms (cached)
+   **Then** AI-generated summary appears within 8 seconds (first-time) or &lt;200ms (cached)
 
 2. **Given** Summary content is generated,
    **When** user compares length to Original,
@@ -121,13 +121,13 @@ This is the detailed 864-line specification document. For a quicker overview, se
 
 **As a** new visitor interested in Summary or Personalized modes,
 **I want** quick, frictionless sign-up (email + password + 1 context question),
-**So that** I can unlock advanced modes in <60 seconds without abandoning the page.
+**So that** I can unlock advanced modes in &lt;60 seconds without abandoning the page.
 
 **Why this priority**: **Prerequisite** for P0 & P1. Must be production-ready (secure, fast, reliable). No signup = no feature usage.
 
 **Independent Test**:
 1. Anonymous user clicks "Summary" → signup modal appears
-2. User completes signup in <60 seconds → immediately sees Summary content
+2. User completes signup in &lt;60 seconds → immediately sees Summary content
 3. **Delivers value**: Zero friction between discovery and access
 
 **Acceptance Scenarios**:
@@ -215,7 +215,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 
 **Authentication**:
 - What happens when user's JWT token expires mid-session?
-  → Auto-refresh token silently if <7 days old, else redirect to login
+  → Auto-refresh token silently if &lt;7 days old, else redirect to login
 
 - What happens when user signup fails (duplicate email, weak password)?
   → Show inline error message, preserve form data, suggest fix
@@ -234,7 +234,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 - What happens when cache is full (storage limit reached)?
   → Use LRU (Least Recently Used) eviction policy, max 100MB per user
 
-- What happens when user has slow connection (<1 Mbps)?
+- What happens when user has slow connection (&lt;1 Mbps)?
   → Show loading skeleton immediately, progressive content rendering
 
 **Abuse/Security**:
@@ -272,7 +272,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 - **FR-U01**: System MUST display three tabs at top of every lesson page: [Original] [Summary] [Personalized]
 - **FR-U02**: System MUST visually highlight active tab (color + underline)
 - **FR-U03**: System MUST show signup modal when unauthenticated user clicks Summary/Personalized
-- **FR-U04**: System MUST show loading indicator during content generation (<8s for first-time, <200ms for cached)
+- **FR-U04**: System MUST show loading indicator during content generation (&lt;8s for first-time, &lt;200ms for cached)
 - **FR-U05**: System MUST persist tab selection across page navigation (localStorage + user profile)
 - **FR-U06**: System MUST be mobile-responsive (works on 375px+ width screens)
 
@@ -311,7 +311,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 **Engagement Metrics (Week 1 post-launch)**
 - **SC-001**: ≥25% of users interact with tabs (click Summary or Personalized at least once) → Target: 40%
 - **SC-002**: ≥60 cache hit rate (reduces API costs) → Target: 80%
-- **SC-003**: <8s average content generation time (95th percentile) → Target: 6s
+- **SC-003**: &lt;8s average content generation time (95th percentile) → Target: 6s
 
 **Quality Metrics (Month 1)**
 - **SC-004**: Summary length is 30-50% of Original (automated validation on all generated content)
@@ -325,7 +325,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 
 **Business Metrics (Month 3)**
 - **SC-010**: ≥500 signups (validates feature demand)
-- **SC-011**: <$50/month AI API costs (proves cost-efficiency via caching)
+- **SC-011**: Under $50/month AI API costs (proves cost-efficiency via caching)
 - **SC-012**: ≥40% of signups come from non-technical backgrounds (validates personalization value)
 
 ---
@@ -628,7 +628,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 |------|--------|-------------|------------|
 | **AI generation costs exceed budget** | High | Medium | Aggressive caching (80% hit rate target), rate limiting (10 req/min), free tier limits (1500 req/day) |
 | **Generated content loses critical info** | High | Low | Validation prompts (check for "Try With AI" preservation), manual spot-checks (10% sample), user feedback loop |
-| **Slow generation impacts UX** | Medium | Medium | Lazy loading (generate on tab click, not page load), loading skeletons, cache-first strategy (<200ms for hits) |
+| **Slow generation impacts UX** | Medium | Medium | Lazy loading (generate on tab click, not page load), loading skeletons, cache-first strategy (&lt;200ms for hits) |
 | **Low signup conversion** | Medium | Medium | A/B test signup modal copy, reduce friction (social login in v2), incentivize (badges, progress tracking) |
 | **Security vulnerability (auth bypass)** | Critical | Low | Security audit before launch, JWT best practices, rate limiting, input validation, Sentry monitoring |
 | **Database scaling costs** | Medium | Low | Start with free tier (256MB Vercel Postgres), monitor growth, optimize queries, upgrade only if needed ($20/month) |
@@ -663,10 +663,10 @@ This is the detailed 864-line specification document. For a quicker overview, se
 - [ ] Set up Vercel KV (Redis) for caching
 - [ ] Build `ContentModeTabs` React component (Original + Summary tabs only)
 - [ ] Add loading states and error handling
-- [ ] Write tests (E2E: user clicks Summary → sees condensed content in <8s)
+- [ ] Write tests (E2E: user clicks Summary → sees condensed content in &lt;8s)
 - [ ] Validate Summary length (30-50% of Original, automated check)
 
-**Success Criteria**: Authenticated user clicks Summary tab → sees AI-generated summary in <8 seconds (first-time) or <200ms (cached)
+**Success Criteria**: Authenticated user clicks Summary tab → sees AI-generated summary in &lt;8 seconds (first-time) or &lt;200ms (cached)
 
 ---
 
@@ -699,7 +699,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 - [ ] Monitor metrics (engagement, errors, performance)
 - [ ] Full launch (100% rollout)
 
-**Success Criteria**: Zero critical bugs, 40% tab usage, <8s generation time, <$50/month costs
+**Success Criteria**: Zero critical bugs, 40% tab usage, &lt;8s generation time, under $50/month costs
 
 ---
 
@@ -716,7 +716,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 **Performance**
 - Content generation time (p50, p95, p99)
 - Cache hit rate (target: 80%+)
-- API error rate (target: <1%)
+- API error rate (target: &lt;1%)
 - Page load time impact (should not increase)
 
 **Quality**
@@ -733,7 +733,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 
 - ⚠️ Error rate >5% for 5 minutes → Slack alert
 - ⚠️ Generation time >10s (p95) → Performance investigation
-- ⚠️ Cache hit rate <60% → Caching review
+- ⚠️ Cache hit rate &lt;60% → Caching review
 - ⚠️ Signup failures >10% → Auth flow debug
 
 ---
@@ -746,7 +746,7 @@ This is the detailed 864-line specification document. For a quicker overview, se
 2. ✅ **40%+ tab usage** (users find value in alternatives to Original)
 3. ✅ **4.0/5.0 user satisfaction** (Summary and Personalized modes are useful)
 4. ✅ **Zero critical security incidents** (auth system is secure)
-5. ✅ **<$50/month operating costs** (caching works, free tiers sufficient)
+5. ✅ **Under $50/month operating costs** (caching works, free tiers sufficient)
 6. ✅ **80%+ cache hit rate** (validates performance optimization)
 7. ✅ **40%+ non-technical signups** (personalization unlocks new audience)
 

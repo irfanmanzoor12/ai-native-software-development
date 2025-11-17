@@ -27,7 +27,7 @@ description: "Meeting agenda and decision framework"
 - [ ] Prepare 10-minute presentation (use SUMMARY.md slides)
 - [ ] Demo signup flow (can use mockups from VISUAL-GUIDE.md)
 - [ ] Be ready to answer open questions (Q1-Q4 in spec.md)
-- [ ] Have cost breakdown ready ($8.50/week estimated, <$50/month target)
+- [ ] Have cost breakdown ready ($8.50/week estimated, $&lt;50/month target)
 
 ---
 
@@ -38,7 +38,7 @@ This review should answer:
 1. **Business Value**: Is this worth building? (40%+ engagement target)
 2. **Technical Feasibility**: Can we build this with existing infrastructure?
 3. **Security**: Is the authentication system production-ready?
-4. **Cost**: Can we afford this? (<$50/month target with free tiers)
+4. **Cost**: Can we afford this? (under $50/month target with free tiers)
 5. **Timeline**: Is 4 weeks realistic?
 
 ---
@@ -237,7 +237,7 @@ Meeting is successful if we:
 1. ✅ Understand the business value and user problem
 2. ✅ Validate technical architecture is sound
 3. ✅ Confirm security approach is production-ready
-4. ✅ Agree on cost projections (<$50/month)
+4. ✅ Agree on cost projections (under $50/month)
 5. ✅ Make decisions on open questions (Q1-Q4)
 6. ✅ Approve or provide clear revision feedback
 

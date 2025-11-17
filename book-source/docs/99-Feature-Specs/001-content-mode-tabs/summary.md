@@ -73,7 +73,7 @@ USER CLICKS TAB
     └─ YES ↓
          ↓
 [Check Cache (Redis)]
-    ├─ HIT → Return instantly (<200ms)
+    ├─ HIT → Return instantly (&lt;200ms)
     └─ MISS ↓
            ↓
 [Generate with Gemini AI]
@@ -111,7 +111,7 @@ USER CLICKS TAB
 | Tab Usage | 40%+ | User engagement |
 | User Satisfaction | 4.0/5.0 | Content quality |
 | Cache Hit Rate | 80%+ | Cost efficiency |
-| API Costs | <$50/month | Sustainable |
+| API Costs | Under $50/month | Sustainable |
 | Non-Technical Users | 40%+ | Personalization value |
 
 ---
@@ -134,7 +134,7 @@ USER CLICKS TAB
 - Create `ContentModeTabs` component (2 tabs: Original + Summary)
 - AI prompt engineering for summaries
 
-**Deliverable**: Authenticated users see AI-generated summaries in <8 seconds
+**Deliverable**: Authenticated users see AI-generated summaries in &lt;8 seconds
 
 ---
 
@@ -171,7 +171,7 @@ USER CLICKS TAB
 **Caching Strategy**:
 - 80%+ cache hit rate target
 - Reduces AI API calls by 80%
-- **Estimated cost**: <$50/month for 1000 active users
+- **Estimated cost**: $&lt;50/month for 1000 active users
 
 **Upgrade Path** (if needed):
 - Vercel Postgres: $20/month (512MB + 100 hours)
@@ -267,7 +267,7 @@ USER CLICKS TAB
 
 ✅ **Follows SDD (Specification-Driven Development)** - Professional workflow
 ✅ **Security best practices** - bcrypt, JWT, rate limiting, input validation
-✅ **Cost-optimized** - 80% caching, free tiers, <$50/month target
+✅ **Cost-optimized** - 80% caching, free tiers, under $50/month target
 ✅ **Monitored** - Sentry (errors), PostHog (analytics), alerts
 ✅ **Scalable** - Serverless, Redis caching, CDN-ready
 ✅ **Testable** - Each phase independently deployable

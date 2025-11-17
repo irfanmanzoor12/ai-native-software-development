@@ -52,7 +52,7 @@ Add **3 toggleable content modes** to every lesson page:
 ### Business Value
 - 📈 **40%+ engagement** increase expected
 - 🌍 **Unlock non-technical audience** (accountants, doctors, teachers)
-- 💰 **<$50/month** operating costs
+- 💰 **$&lt;50/month** operating costs
 - 📊 **Data collection** (user preferences, behavior)
 - 🚀 **Monetization foundation** (free signup → future premium)
 
@@ -70,7 +70,7 @@ graph TD
     A[User Clicks Tab] --> B{Authenticated?}
     B -->|No| C[Show Signup Modal]
     B -->|Yes| D{Check Cache}
-    D -->|Hit| E[Return Instantly <200ms]
+    D -->|Hit| E[Return Instantly &lt;200ms]
     D -->|Miss| F[Generate with Gemini AI]
     F --> G[Cache for 7 days]
     G --> H[Return to User]
@@ -101,7 +101,7 @@ graph TD
 ### With 80% Caching Strategy
 - **Week 1**: ~$8.50
 - **Month 1**: ~$35
-- **Target**: <$50/month for 1000 active users ✅
+- **Target**: $&lt;50/month for 1000 active users ✅
 
 ---
 
@@ -123,7 +123,7 @@ graph TD
 - Create ContentModeTabs component
 - AI prompt engineering
 
-**Deliverable**: Summary tab generates AI-condensed content in <8 seconds
+**Deliverable**: Summary tab generates AI-condensed content in &lt;8 seconds
 
 ---
 
@@ -144,7 +144,7 @@ graph TD
 - Documentation
 - Soft launch → Full launch
 
-**Deliverable**: Production-ready with <1% error rate
+**Deliverable**: Production-ready with &lt;1% error rate
 
 ---
 
@@ -156,7 +156,7 @@ graph TD
 | Tab Usage | 40%+ | User engagement |
 | Satisfaction | 4.0/5.0 | Content quality |
 | Cache Hit Rate | 80%+ | Cost efficiency |
-| API Costs | <$50/mo | Sustainability |
+| API Costs | Under $50/mo | Sustainability |
 | Non-Technical Users | 40%+ | Personalization value |
 
 ---
