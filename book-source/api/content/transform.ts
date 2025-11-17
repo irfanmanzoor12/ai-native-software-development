@@ -16,76 +16,39 @@ interface RequestBody {
 
 // AI Prompts for content transformation
 const TRANSFORMATION_PROMPTS = {
-  summary: `You are generating a SUMMARY version of a lesson from "AI Native Software Development: Colearning Agentic AI with Python and TypeScript".
+  summary: `Condense this lesson to 30-50% length. Keep:
+- Learning objectives (exact)
+- Key concepts (simplified)
+- 1 code example per concept
+- ALL "Try With AI" sections
+- Critical warnings
 
-TASK: Condense the following lesson to 30-50% of its original length while preserving:
-- All learning objectives (verbatim)
-- Key concepts and definitions (simplified if possible)
-- At least 1 representative code example per major concept
-- ALL "Try With AI" prompts (these are critical for hands-on practice)
-- Critical warnings, notes, and best practices
+Remove: long explanations, redundant examples, background context.
 
-REMOVE:
-- Extended explanations and analogies (keep only essential context)
-- Redundant examples (keep the clearest one)
-- Detailed walkthroughs (condense to essential steps)
-- Background context that isn't directly required to understand the core concept
+Style: Concise, technical, bullet-points. Active voice.
 
-TARGET AUDIENCE: Readers who have already read the Original lesson and need quick review/refresh.
-
-WRITING STYLE: Concise, technical, bullet-point friendly. Use active voice. Assume reader has basic context.
-
-VALIDATION:
-- Final output must be 30-50% the length of the original (character count)
-- All markdown formatting must be preserved (headings, code blocks, links, images)
-- All "Try With AI" sections must be present
-
-ORIGINAL LESSON:
+LESSON:
 {originalContent}
 
-Generate the summary in markdown format, maintaining the same heading structure but condensing body text.`,
+Output: Markdown with same headings, condensed text.`,
 
-  personalized: `You are adapting a lesson for a PROFESSIONAL with specific background.
+  personalized: `Adapt this lesson for {professionalBackground} professional.
 
-TASK: Rewrite the following lesson to make it accessible and relevant for someone with {professionalBackground} background.
+Replace jargon with domain analogies:
+- Variables → domain data
+- Functions → domain processes
+- Loops → repetitive tasks
 
-READER PROFILE:
-- Professional: {professionalBackground}
-- Motivation: Apply AI/programming skills to their domain
-- Strengths: Domain expertise, logical thinking
-- Weaknesses: May have limited programming experience, unfamiliar with technical jargon
+Use domain examples in code and "Try With AI" prompts.
 
-ADAPTATION STRATEGY:
-1. **Replace jargon with domain-specific analogies**:
-   - Variables → Domain-specific equivalents
-   - Functions → Domain processes
-   - Loops → Repetitive domain tasks
-   - APIs → Domain integrations
-   - Databases → Domain data storage systems
+Tone: Warm, supportive. "Your domain expertise helps you understand this."
 
-2. **Use domain-specific examples**:
-   - Code examples should involve domain-relevant scenarios
-   - "Try With AI" prompts should reference domain tasks
+Keep: "Try With AI" sections (adapt to domain), code (add domain-context comments), objectives.
 
-3. **Simplify technical concepts**:
-   - Avoid jargon, use plain language
-   - Break down complex ideas step-by-step
-   - Use analogies from the reader's domain
-
-4. **Maintain confidence-building tone**:
-   - Acknowledge: "This may feel unfamiliar, but you already understand similar concepts"
-   - Encourage: "Your domain expertise will help you understand this"
-   - Reassure: "AI will help with syntax—focus on the logic"
-
-PRESERVE:
-- All "Try With AI" prompts (but adapt examples to domain context)
-- Code examples (but add comments explaining each line in domain terms)
-- Learning objectives (but reframe for the professional's domain)
-
-ORIGINAL LESSON:
+LESSON:
 {originalContent}
 
-Generate the personalized version in markdown format. Use a warm, supportive tone. Make technical concepts feel approachable.`,
+Output: Markdown, domain-adapted.`,
 };
 
 export default async function handler(req: Request): Promise<Response> {
@@ -145,15 +108,15 @@ To use ${mode === 'summary' ? 'Summary' : 'Personalized'} mode, you need a free 
       );
     }
 
-    // Initialize Gemini
+    // Initialize Gemini with optimized settings
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-lite',
+      model: 'gemini-2.0-flash-exp', // Fastest model
       generationConfig: {
-        temperature: 0.7, // Balance creativity & consistency
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 4096,
+        temperature: 0.5, // Lower = faster, more consistent
+        topK: 20, // Reduced for speed
+        topP: 0.9, // Slightly reduced for speed
+        maxOutputTokens: 1500, // Reduced tokens for faster generation
       },
     });
 

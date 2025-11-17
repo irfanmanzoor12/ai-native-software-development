@@ -23,24 +23,102 @@
   border-radius: 6px;
   color: var(--ifm-font-color-base);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   flex: 1;
   min-width: 120px;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple effect on click */
+.toggleButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease-out, height 0.5s ease-out, opacity 0.5s ease-out;
+  opacity: 0;
+}
+
+.toggleButton:active::before {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  transition: width 0s, height 0s, opacity 0s;
+}
+
+/* Shimmer effect for active button */
+.toggleButton::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 100%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
 }
 
 .toggleButton:hover {
   background: var(--ifm-color-emphasis-200);
   border-color: var(--ifm-color-primary);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .toggleButton.active {
-  background: var(--ifm-color-primary);
+  background: linear-gradient(135deg, var(--ifm-color-primary) 0%, var(--ifm-color-primary-dark) 100%);
   border-color: var(--ifm-color-primary);
   color: white;
   font-weight: 600;
+  animation: activatePulse 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Shimmer on active button */
+.toggleButton.active::after {
+  left: 200%;
+  transition: left 0.8s ease;
+}
+
+/* Continuous subtle glow for active button */
+.toggleButton.active {
+  animation: activatePulse 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+             subtleGlow 2s ease-in-out infinite;
+}
+
+@keyframes activatePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes subtleGlow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.6);
+  }
 }
 
 .buttonIcon {

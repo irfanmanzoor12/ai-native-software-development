@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './styles.module.css';
+import SignupModal from '../SignupModal';
 
 type ContentMode = 'original' | 'summary' | 'personalized';
 
@@ -13,11 +14,28 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
   const [transformedContent, setTransformedContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+    setIsAuthenticated(authStatus);
+  }, []);
 
   // Listen for mode changes from ContentModeToggle
   useEffect(() => {
     const handleModeChange = (event: CustomEvent<{ mode: ContentMode }>) => {
-      setMode(event.detail.mode);
+      const newMode = event.detail.mode;
+
+      // Check if user needs to sign up
+      if ((newMode === 'summary' || newMode === 'personalized') && !isAuthenticated) {
+        setShowSignupModal(true);
+        setMode('original'); // Keep original mode until signed up
+        return;
+      }
+
+      setMode(newMode);
     };
 
     window.addEventListener('contentModeChanged', handleModeChange as EventListener);
@@ -25,13 +43,17 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
     // Load initial mode from localStorage
     const savedMode = localStorage.getItem('contentMode') as ContentMode;
     if (savedMode && ['original', 'summary', 'personalized'].includes(savedMode)) {
-      setMode(savedMode);
+      if ((savedMode === 'summary' || savedMode === 'personalized') && !isAuthenticated) {
+        setMode('original');
+      } else {
+        setMode(savedMode);
+      }
     }
 
     return () => {
       window.removeEventListener('contentModeChanged', handleModeChange as EventListener);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // Fetch transformed content when mode changes
   useEffect(() => {
@@ -111,15 +133,24 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
     return <>{children}</>;
   }
 
-  // Show loading state
+  // Show loading state with animated progress
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
+        <div className={styles.spinnerWrapper}>
+          <div className={styles.spinner}></div>
+          <div className={styles.spinnerGlow}></div>
+        </div>
         <p className={styles.loadingText}>
           {mode === 'summary'
-            ? 'Generating AI summary... (3-6 seconds)'
-            : 'Personalizing content for you... (3-6 seconds)'}
+            ? '⚡ Generating AI summary...'
+            : '🎯 Personalizing content for you...'}
+        </p>
+        <div className={styles.progressBar}>
+          <div className={styles.progressFill}></div>
+        </div>
+        <p className={styles.loadingHint}>
+          ✨ This usually takes 2-4 seconds
         </p>
       </div>
     );
@@ -173,5 +204,14 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
   }
 
   // Fallback: show original
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        mode={mode === 'summary' ? 'summary' : 'personalized'}
+      />
+    </>
+  );
 }
