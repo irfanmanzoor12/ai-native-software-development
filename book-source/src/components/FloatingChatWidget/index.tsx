@@ -18,7 +18,7 @@ interface RateLimitState {
 const MAX_REQUESTS_PER_HOUR = 10;
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
 
-export default function FloatingChatWidget(): JSX.Element {
+function FloatingChatWidgetInner(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -28,18 +28,25 @@ export default function FloatingChatWidget(): JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Rate limiting state
-  const [rateLimit, setRateLimit] = useState<RateLimitState>(() => {
+  const [rateLimit, setRateLimit] = useState<RateLimitState>({ count: 0, resetAt: Date.now() + RATE_LIMIT_WINDOW });
+
+  // Load rate limit from localStorage
+  useEffect(() => {
     const saved = localStorage.getItem('chatRateLimit');
     if (saved) {
-      const parsed = JSON.parse(saved);
-      // Reset if window expired
-      if (Date.now() > parsed.resetAt) {
-        return { count: 0, resetAt: Date.now() + RATE_LIMIT_WINDOW };
+      try {
+        const parsed = JSON.parse(saved);
+        // Reset if window expired
+        if (Date.now() > parsed.resetAt) {
+          setRateLimit({ count: 0, resetAt: Date.now() + RATE_LIMIT_WINDOW });
+        } else {
+          setRateLimit(parsed);
+        }
+      } catch (e) {
+        console.error('Failed to load rate limit:', e);
       }
-      return parsed;
     }
-    return { count: 0, resetAt: Date.now() + RATE_LIMIT_WINDOW };
-  });
+  }, []);
 
   // Load conversation history from localStorage
   useEffect(() => {
@@ -203,11 +210,9 @@ I can see which lesson you're on and provide context-aware help!`,
     setError(null);
   };
 
+  const contextBreadcrumb = getBreadcrumb(extractPageContext());
+
   return (
-    <BrowserOnly>
-      {() => {
-        const contextBreadcrumb = getBreadcrumb(extractPageContext());
-        return (
     <>
       {/* Floating Button */}
       {!isOpen && (
@@ -313,8 +318,13 @@ I can see which lesson you're on and provide context-aware help!`,
         </div>
       )}
     </>
-        );
-      }}
+  );
+}
+
+export default function FloatingChatWidget(): JSX.Element {
+  return (
+    <BrowserOnly fallback={<div />}>
+      {() => <FloatingChatWidgetInner />}
     </BrowserOnly>
   );
 }

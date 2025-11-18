@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SummaryNavigator from '@/components/SummaryNavigator';
+import SummaryChat from '@/components/SummaryChat';
 import SignupModal from '@/components/SignupModal';
 import styles from './styles.module.css';
 
@@ -108,8 +108,8 @@ export default function ContentModeToggle(): JSX.Element {
         </div>
       </div>
 
-      {/* Summary/Personalized Navigator */}
-      <SummaryNavigator
+      {/* Summary/Personalized Chat */}
+      <SummaryChat
         isOpen={showNavigator}
         onClose={() => {
           setShowNavigator(false);
