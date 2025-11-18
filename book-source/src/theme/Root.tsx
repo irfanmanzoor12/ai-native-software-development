@@ -11,12 +11,14 @@
 import React from 'react';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import AgentStudio from '@/components/AgentStudio';
+import FloatingChatWidget from '@/components/FloatingChatWidget';
 
 export default function Root({ children }: { children: React.ReactNode }) {
   return (
     <AnalyticsTracker>
       {children}
       <AgentStudio />
+      <FloatingChatWidget />
     </AnalyticsTracker>
   );
 }

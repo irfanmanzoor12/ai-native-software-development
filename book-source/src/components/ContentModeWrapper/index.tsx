@@ -68,6 +68,28 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
       setError(null);
 
       try {
+        // Check cache first (saves AI quota)
+        const currentPath = lessonPath || window.location.pathname;
+        const professionalBg = localStorage.getItem('professionalBackground') || 'General';
+        const cacheKey = `content_${mode}_${currentPath}_${professionalBg}_v1`;
+
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            const cachedData = JSON.parse(cached);
+            // Cache valid for 7 days
+            const cacheAge = Date.now() - cachedData.timestamp;
+            if (cacheAge < 7 * 24 * 60 * 60 * 1000) {
+              setTransformedContent(cachedData.content);
+              setIsLoading(false);
+              return;
+            }
+          } catch (e) {
+            // Invalid cache, continue to fetch
+            localStorage.removeItem(cacheKey);
+          }
+        }
+
         // Extract the actual markdown content from the page
         const contentElement = document.querySelector('article.markdown') ||
                               document.querySelector('.markdown') ||
@@ -87,9 +109,9 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
           },
           body: JSON.stringify({
             mode,
-            lessonPath: lessonPath || window.location.pathname,
+            lessonPath: currentPath,
             originalContent: originalContent.trim(),
-            professionalBackground: 'General', // TODO: Get from user profile
+            professionalBackground: professionalBg,
           }),
         });
 
@@ -110,6 +132,12 @@ export default function ContentModeWrapper({ children, lessonPath }: ContentMode
           setError(data.content);
           return;
         }
+
+        // Cache the result
+        localStorage.setItem(cacheKey, JSON.stringify({
+          content: data.content,
+          timestamp: Date.now()
+        }));
 
         setTransformedContent(data.content);
       } catch (err) {
