@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BOOK_STRUCTURE, type Part, type Chapter, type Lesson } from '@/utils/bookStructure';
 import styles from './styles.module.css';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 
 interface SummaryNavigatorProps {
   isOpen: boolean;
@@ -150,6 +151,8 @@ export default function SummaryNavigator({ isOpen, onClose, mode }: SummaryNavig
   const modeTitle = mode === 'summary' ? 'Summary Navigator' : 'Personalized Navigator';
 
   return (
+    <BrowserOnly>
+      {() => (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
@@ -317,5 +320,7 @@ export default function SummaryNavigator({ isOpen, onClose, mode }: SummaryNavig
         </div>
       </div>
     </div>
+      )}
+    </BrowserOnly>
   );
 }

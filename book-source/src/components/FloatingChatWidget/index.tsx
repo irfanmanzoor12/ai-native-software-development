@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { extractPageContext, formatContextForAI, getBreadcrumb } from '@/utils/pageContext';
 import styles from './styles.module.css';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 
 interface Message {
   id: string;
@@ -202,9 +203,11 @@ I can see which lesson you're on and provide context-aware help!`,
     setError(null);
   };
 
-  const contextBreadcrumb = getBreadcrumb(extractPageContext());
-
   return (
+    <BrowserOnly>
+      {() => {
+        const contextBreadcrumb = getBreadcrumb(extractPageContext());
+        return (
     <>
       {/* Floating Button */}
       {!isOpen && (
@@ -310,5 +313,8 @@ I can see which lesson you're on and provide context-aware help!`,
         </div>
       )}
     </>
+        );
+      }}
+    </BrowserOnly>
   );
 }
