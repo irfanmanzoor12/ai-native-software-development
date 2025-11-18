@@ -1,15 +1,11 @@
 /**
- * ULTRA-FAST Chat API - Groq Integration (OPTIONAL UPGRADE)
+ * Conversational Query API - Vercel Serverless Function
  *
- * Groq LPU Inference: 10x faster than standard GPUs
- * Free Tier: 14,400 requests/day (vs Gemini's 1,500)
- * Response Time: 200-500ms (vs Gemini's 2-4s)
- *
- * Setup:
- * 1. Get free API key: https://console.groq.com
- * 2. Add to .env: GROQ_API_KEY=your_key_here
- * 3. Rename this file to chat.ts (replace Gemini version)
+ * Handles user queries about book content (parts, chapters, lessons)
+ * with context-aware AI responses using Google Gemini.
  */
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface ChatRequest {
   message: string;
@@ -17,28 +13,63 @@ interface ChatRequest {
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
-const SYSTEM_PROMPT = `You are an AI Learning Assistant for "AI Native Software Development: Colearning Agentic AI with Python and TypeScript".
+// Enhanced system prompt with book structure knowledge
+const SYSTEM_PROMPT = `You are an AI Learning Assistant for the book "AI Native Software Development: Colearning Agentic AI with Python and TypeScript".
 
 **BOOK STRUCTURE** (55 chapters across 13 parts):
-Part 1: Introducing AI-Driven Development (Chapters 1-4)
-Part 2: AI Tool Landscape (Chapters 5-8)
-Part 3: Markdown-Prompt-Context-Engineering (Chapters 9-16)
-Part 4: Python Fundamentals (Chapters 17-29)
-Part 5: Spec-Driven Development (Chapters 30-38)
-Parts 6-13: Advanced Topics (Chapters 39-55)
 
-**CORE PHILOSOPHY:**
+Part 1: Introducing AI-Driven Development (Chapters 1-4)
+- Paradigm shift from code-first to specification-first development
+- AI as thinking partner, not just a tool
+
+Part 2: AI Tool Landscape (Chapters 5-8)
+- Claude Code, Gemini AI Studio, prompt engineering tools
+- Setting up your AI development environment
+
+Part 3: Markdown-Prompt-Context-Engineering (Chapters 9-16)
+- Mastering prompts, context management, markdown skills
+- Writing effective specifications
+
+Part 4: Python Fundamentals (Chapters 17-29)
+- Python basics → async programming → agent systems
+- Building multi-agent architectures
+
+Part 5: Spec-Driven Development (Chapters 30-38)
+- Complete specification-first workflow
+- Validation, testing, deployment
+
+Parts 6-13: Advanced Topics (Chapters 39-55)
+- TypeScript, full-stack development
+- Production deployment, scaling, DevOps
+
+**CORE PHILOSOPHY**:
 - Specification-First: Write spec → AI implements → Validate
 - Co-Learning: Human architects, AI executes, both learn together
+- Python (reasoning/backend) + TypeScript (interaction/frontend)
+- Quality shift: Bugs in specs, not implementation
 
-**RESPONSE STYLE:**
-- ULTRA CONCISE (2 paragraphs MAX - optimize for speed!)
-- Direct, actionable answers
-- Reference specific chapters/lessons
+**YOUR ROLE**:
+1. Answer questions about specific parts, chapters, or lessons
+2. Explain concepts using the book's spec-first philosophy
+3. Provide relevant examples from the book content
+4. Guide learners through the curriculum progression
+5. Be encouraging and supportive (this is a beginner-friendly book)
+
+**RESPONSE STYLE**:
+- CONCISE and FAST (2-3 paragraphs MAXIMUM - be brief!)
+- Use examples from book content when possible
+- Reference specific parts/chapters/lessons
+- Encourage hands-on practice with AI tools
 - Warm, supportive, educational tone
+- Prioritize SPEED - give quick, actionable answers
+
+**CONTEXT AWARENESS**:
+When page context is provided, prioritize explaining content from that specific location.
+If user asks general questions, draw from entire book structure.
 `;
 
 export default async function handler(req: Request): Promise<Response> {
+  // CORS headers for client-side requests
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -46,10 +77,12 @@ export default async function handler(req: Request): Promise<Response> {
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers });
   }
 
+  // Only allow POST requests
   if (req.method !== 'POST') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
@@ -61,6 +94,7 @@ export default async function handler(req: Request): Promise<Response> {
     const body: ChatRequest = await req.json();
     const { message, pageContext, conversationHistory = [] } = body;
 
+    // Validate required fields
     if (!message || message.trim().length === 0) {
       return new Response(
         JSON.stringify({ error: 'Message is required' }),
@@ -68,101 +102,102 @@ export default async function handler(req: Request): Promise<Response> {
       );
     }
 
-    // Get Groq API key
-    const apiKey = process.env.GROQ_API_KEY;
+    // Rate limiting check (client-side handles this, but validate here too)
+    if (message.length > 1000) {
+      return new Response(
+        JSON.stringify({ error: 'Message too long (max 1000 characters)' }),
+        { status: 400, headers }
+      );
+    }
+
+    // Get API key from environment
+    const apiKey = process.env.GEMINI_API_KEY || process.env.DOCUSAURUS_GEMINI_API_KEY;
 
     if (!apiKey) {
       return new Response(
         JSON.stringify({
           error: 'API_KEY_NOT_CONFIGURED',
-          response: `⚠️ **Groq Not Configured**
+          response: `⚠️ **Chat Feature Not Configured**
 
-To use ultra-fast Groq LPU inference:
-1. Get free API key: https://console.groq.com
-2. Add to environment: \`GROQ_API_KEY=your_key_here\`
+To use the AI chat assistant, you need a free Google Gemini API key.
+
+**Setup:**
+1. Get your free API key: https://aistudio.google.com/app/apikey
+2. Add to environment variables: \`GEMINI_API_KEY=your_key_here\`
 3. Redeploy
 
-**Free tier:** 14,400 requests/day - 10x faster responses!`,
+**Free tier:** 1,500 requests/day - no credit card needed!`,
         }),
         { status: 200, headers }
       );
     }
 
-    // Build conversation messages for Groq
-    const messages = [
-      {
-        role: 'system',
-        content: SYSTEM_PROMPT + (pageContext ? `\n\n**CURRENT CONTEXT:**\n${pageContext}` : ''),
+    // Initialize Gemini with optimized settings for SPEED
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp', // Fastest model available
+      generationConfig: {
+        temperature: 0.6, // Lower = faster, more focused
+        topK: 20, // Reduced for faster sampling
+        topP: 0.9, // Reduced for faster generation
+        maxOutputTokens: 500, // Shorter responses = faster (2-3 paragraphs max)
       },
-      // Add conversation history
-      ...conversationHistory.slice(-3).map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content,
-      })),
-      // Add current user message
-      {
-        role: 'user',
-        content: message,
-      },
-    ];
-
-    // Call Groq API with ULTRA-FAST configuration
-    const startTime = Date.now();
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // Fastest large model
-        messages,
-        temperature: 0.5, // Lower for speed
-        max_tokens: 400, // Even shorter for ultra-fast
-        top_p: 0.9,
-        stream: false, // Can enable streaming for perceived speed
-      }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Groq API request failed');
+    // Build the conversation prompt
+    let prompt = SYSTEM_PROMPT;
+
+    // Add page context if available
+    if (pageContext) {
+      prompt += `\n\n**CURRENT PAGE CONTEXT**:\n${pageContext}\n`;
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices[0]?.message?.content || 'No response generated';
-    const responseTime = Date.now() - startTime;
+    // Add conversation history (last 5 messages for context)
+    if (conversationHistory.length > 0) {
+      prompt += '\n\n**CONVERSATION HISTORY**:\n';
+      const recentHistory = conversationHistory.slice(-5);
+      recentHistory.forEach(msg => {
+        const role = msg.role === 'user' ? 'User' : 'Assistant';
+        prompt += `${role}: ${msg.content}\n`;
+      });
+    }
 
-    console.log(`✅ Groq response time: ${responseTime}ms`); // Monitor speed
+    // Add current user message
+    prompt += `\n\n**USER QUESTION**:\n${message}\n\n**YOUR RESPONSE**:`;
 
+    // Generate response
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const aiResponse = response.text();
+
+    // Return successful response
     return new Response(
       JSON.stringify({
         response: aiResponse,
         timestamp: new Date().toISOString(),
-        responseTime, // Include for monitoring
-        model: 'llama-3.3-70b-versatile',
       }),
       { status: 200, headers }
     );
 
   } catch (error) {
-    console.error('Groq Chat API Error:', error);
+    console.error('Chat API Error:', error);
 
     let errorMessage = `⚠️ Sorry, I encountered an error. Please try again.`;
 
     if (error.message?.includes('API key') || error.message?.includes('invalid')) {
-      errorMessage = `⚠️ **Invalid Groq API Key**
+      errorMessage = `⚠️ **Invalid API Key**
 
-Please check:
-- Environment variable: \`GROQ_API_KEY\`
-- Get a free key: https://console.groq.com`;
+Please check your API key configuration:
+- Environment variable: \`GEMINI_API_KEY\`
+- Get a free key: https://aistudio.google.com/app/apikey`;
     }
 
     if (error.message?.includes('quota') || error.message?.includes('rate limit')) {
       errorMessage = `⚠️ **Rate Limit Reached**
 
-Free tier: 14,400 requests/day
-Wait a moment and try again.`;
+Free tier limit: 1,500 requests/day
+
+Please wait a moment and try again.`;
     }
 
     return new Response(

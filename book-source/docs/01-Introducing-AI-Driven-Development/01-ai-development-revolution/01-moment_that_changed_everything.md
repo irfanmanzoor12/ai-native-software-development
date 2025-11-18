@@ -1,5 +1,5 @@
 ---
-title: "A Moment That Changed Everything"!
+title: "A Moment That Changed Everything"
 chapter: 1
 lesson: 1
 duration_minutes: 15
