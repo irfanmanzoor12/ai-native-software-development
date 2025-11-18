@@ -206,10 +206,8 @@ Adapt explanation to their ${experienceLevel} level and ${professionalBg} backgr
 Use examples relevant to their goal: "${learningGoal}".
 Be CONCISE (2-3 paragraphs MAX). Make it relatable and actionable.`;
 
-      // Route to different API endpoints based on mode
-      const apiEndpoint = mode === 'summary'
-        ? '/api/query/chat-summary'  // Groq (fast)
-        : '/api/query/chat-personalized';  // Gemini (quality)
+      // Use single working Gemini endpoint for both modes
+      const apiEndpoint = '/api/query/chat';  // Gemini API (reliable)
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
