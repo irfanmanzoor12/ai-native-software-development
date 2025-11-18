@@ -30,9 +30,11 @@ export default function SignupModal({ isOpen, onClose, mode }: SignupModalProps)
       localStorage.setItem('professionalBackground', professionalBackground);
       localStorage.setItem('isAuthenticated', 'true');
 
-      // Close modal and trigger content refresh
+      // Close modal and trigger navigator to open
       onClose();
-      window.location.reload();
+
+      // Dispatch event to notify parent component
+      window.dispatchEvent(new CustomEvent('userAuthenticated'));
     } catch (err) {
       setError('Signup failed. Please try again.');
     } finally {

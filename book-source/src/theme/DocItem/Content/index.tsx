@@ -3,7 +3,6 @@ import Content from '@theme-original/DocItem/Content';
 import type ContentType from '@theme/DocItem/Content';
 import type { WrapperProps } from '@docusaurus/types';
 import ContentModeToggle from '@site/src/components/ContentModeToggle';
-import ContentModeWrapper from '@site/src/components/ContentModeWrapper';
 import { useLocation } from '@docusaurus/router';
 
 type Props = WrapperProps<typeof ContentType>;
@@ -19,13 +18,7 @@ export default function ContentWrapper(props: Props): JSX.Element {
       {shouldShowToggle && (
         <ContentModeToggle />
       )}
-      {shouldShowToggle ? (
-        <ContentModeWrapper lessonPath={location.pathname}>
-          <Content {...props} />
-        </ContentModeWrapper>
-      ) : (
-        <Content {...props} />
-      )}
+      <Content {...props} />
     </>
   );
 }
