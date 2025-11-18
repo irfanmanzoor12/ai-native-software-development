@@ -10,7 +10,11 @@ interface SignupModalProps {
 export default function SignupModal({ isOpen, onClose, mode }: SignupModalProps): JSX.Element | null {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [professionalBackground, setProfessionalBackground] = useState('General');
+  const [experienceLevel, setExperienceLevel] = useState('Beginner');
+  const [learningGoal, setLearningGoal] = useState('');
+  const [interests, setInterests] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,7 +31,11 @@ export default function SignupModal({ isOpen, onClose, mode }: SignupModalProps)
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', name);
       localStorage.setItem('professionalBackground', professionalBackground);
+      localStorage.setItem('experienceLevel', experienceLevel);
+      localStorage.setItem('learningGoal', learningGoal);
+      localStorage.setItem('interests', JSON.stringify(interests));
       localStorage.setItem('isAuthenticated', 'true');
 
       // Close modal and trigger navigator to open
@@ -60,6 +68,21 @@ export default function SignupModal({ isOpen, onClose, mode }: SignupModalProps)
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
+            <label htmlFor="name" className={styles.label}>
+              Full Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={styles.input}
+              placeholder="John Doe"
+              required
+            />
+          </div>
+
+          <div className={styles.formGroup}>
             <label htmlFor="email" className={styles.label}>
               Email Address
             </label>
@@ -91,27 +114,109 @@ export default function SignupModal({ isOpen, onClose, mode }: SignupModalProps)
           </div>
 
           {mode === 'personalized' && (
-            <div className={styles.formGroup}>
-              <label htmlFor="background" className={styles.label}>
-                Professional Background
-              </label>
-              <select
-                id="background"
-                value={professionalBackground}
-                onChange={(e) => setProfessionalBackground(e.target.value)}
-                className={styles.select}
-                required
-              >
-                <option value="General">General</option>
-                <option value="Developer">Software Developer</option>
-                <option value="Business">Business/Management</option>
-                <option value="Accountant">Accountant/Finance</option>
-                <option value="Healthcare">Healthcare Professional</option>
-                <option value="Teacher">Teacher/Education</option>
-                <option value="Designer">Designer/Creative</option>
-                <option value="Legal">Legal/Compliance</option>
-              </select>
-            </div>
+            <>
+              <div className={styles.formGroup}>
+                <label htmlFor="background" className={styles.label}>
+                  Professional Background
+                </label>
+                <select
+                  id="background"
+                  value={professionalBackground}
+                  onChange={(e) => setProfessionalBackground(e.target.value)}
+                  className={styles.select}
+                  required
+                >
+                  <option value="General">General</option>
+                  <option value="Developer">Software Developer</option>
+                  <option value="Business">Business/Management</option>
+                  <option value="Accountant">Accountant/Finance</option>
+                  <option value="Healthcare">Healthcare Professional</option>
+                  <option value="Teacher">Teacher/Education</option>
+                  <option value="Designer">Designer/Creative</option>
+                  <option value="Legal">Legal/Compliance</option>
+                  <option value="Engineering">Engineer (Non-Software)</option>
+                  <option value="Marketing">Marketing/Sales</option>
+                  <option value="Student">Student</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="experience" className={styles.label}>
+                  Programming Experience Level
+                </label>
+                <select
+                  id="experience"
+                  value={experienceLevel}
+                  onChange={(e) => setExperienceLevel(e.target.value)}
+                  className={styles.select}
+                  required
+                >
+                  <option value="Beginner">Beginner (No coding experience)</option>
+                  <option value="Novice">Novice (Learning first language)</option>
+                  <option value="Intermediate">Intermediate (1-2 years)</option>
+                  <option value="Advanced">Advanced (3-5 years)</option>
+                  <option value="Expert">Expert (5+ years)</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="goal" className={styles.label}>
+                  Primary Learning Goal
+                </label>
+                <select
+                  id="goal"
+                  value={learningGoal}
+                  onChange={(e) => setLearningGoal(e.target.value)}
+                  className={styles.select}
+                  required
+                >
+                  <option value="">Select your goal...</option>
+                  <option value="Career Change">Career change to tech</option>
+                  <option value="Build Projects">Build personal projects</option>
+                  <option value="Startup">Launch a startup/product</option>
+                  <option value="Automation">Automate work tasks</option>
+                  <option value="AI Skills">Learn AI development</option>
+                  <option value="Upgrade Skills">Upgrade existing skills</option>
+                  <option value="Research">Academic/Research purposes</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Topics of Interest (select multiple)
+                </label>
+                <div className={styles.checkboxGroup}>
+                  {[
+                    'Python Basics',
+                    'TypeScript',
+                    'AI Agents',
+                    'Prompt Engineering',
+                    'Web Development',
+                    'Backend APIs',
+                    'DevOps',
+                    'Testing',
+                    'Deployment',
+                    'Specification-First Development'
+                  ].map((topic) => (
+                    <label key={topic} className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={interests.includes(topic)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setInterests([...interests, topic]);
+                          } else {
+                            setInterests(interests.filter(i => i !== topic));
+                          }
+                        }}
+                        className={styles.checkbox}
+                      />
+                      <span>{topic}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
 
           {error && (

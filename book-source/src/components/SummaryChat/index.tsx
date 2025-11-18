@@ -175,23 +175,36 @@ Your background: **${localStorage.getItem('professionalBackground') || 'General'
         }
       }
 
-      // Call AI API
+      // Call AI API with rich user profile
+      const userName = localStorage.getItem('userName') || 'there';
       const professionalBg = localStorage.getItem('professionalBackground') || 'General';
+      const experienceLevel = localStorage.getItem('experienceLevel') || 'Beginner';
+      const learningGoal = localStorage.getItem('learningGoal') || 'Learn AI development';
+      const interests = JSON.parse(localStorage.getItem('interests') || '[]');
 
       const systemPrompt = mode === 'summary'
-        ? `You are a helpful AI assistant that provides concise summaries of book content.
+        ? `You are a helpful AI assistant that provides CONCISE summaries of book content.
 User is asking about the book "AI Native Software Development".
 ${contextInfo}
-${lessonContent ? `\nLesson content:\n${lessonContent.substring(0, 3000)}` : ''}
+${lessonContent ? `\nLesson content:\n${lessonContent.substring(0, 2000)}` : ''}
 
-Provide a clear, concise summary (2-4 paragraphs max).`
-        : `You are a helpful AI assistant that personalizes explanations based on user's professional background.
-User's background: ${professionalBg}
-User is asking about the book "AI Native Software Development".
+Provide a BRIEF, clear summary (2-3 paragraphs MAX). Be fast and concise.`
+        : `You are a helpful AI assistant that personalizes explanations based on user profile.
+
+**USER PROFILE:**
+- Name: ${userName}
+- Background: ${professionalBg}
+- Experience: ${experienceLevel}
+- Goal: ${learningGoal}
+- Interests: ${interests.join(', ') || 'General topics'}
+
+User is asking about: "AI Native Software Development"
 ${contextInfo}
-${lessonContent ? `\nLesson content:\n${lessonContent.substring(0, 3000)}` : ''}
+${lessonContent ? `\nLesson content:\n${lessonContent.substring(0, 2000)}` : ''}
 
-Adapt your explanation to their ${professionalBg} background with relevant examples.`;
+Adapt explanation to their ${experienceLevel} level and ${professionalBg} background.
+Use examples relevant to their goal: "${learningGoal}".
+Be CONCISE (2-3 paragraphs MAX). Make it relatable and actionable.`;
 
       const response = await fetch('/api/query/chat', {
         method: 'POST',

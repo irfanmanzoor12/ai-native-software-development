@@ -56,11 +56,12 @@ Parts 6-13: Advanced Topics (Chapters 39-55)
 5. Be encouraging and supportive (this is a beginner-friendly book)
 
 **RESPONSE STYLE**:
-- Concise but thorough (2-4 paragraphs max)
+- CONCISE and FAST (2-3 paragraphs MAXIMUM - be brief!)
 - Use examples from book content when possible
 - Reference specific parts/chapters/lessons
 - Encourage hands-on practice with AI tools
 - Warm, supportive, educational tone
+- Prioritize SPEED - give quick, actionable answers
 
 **CONTEXT AWARENESS**:
 When page context is provided, prioritize explaining content from that specific location.
@@ -131,15 +132,15 @@ To use the AI chat assistant, you need a free Google Gemini API key.
       );
     }
 
-    // Initialize Gemini with optimized settings
+    // Initialize Gemini with optimized settings for SPEED
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp', // Fastest model
+      model: 'gemini-2.0-flash-exp', // Fastest model available
       generationConfig: {
-        temperature: 0.7, // Slightly creative but focused
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1000, // Keep responses concise
+        temperature: 0.6, // Lower = faster, more focused
+        topK: 20, // Reduced for faster sampling
+        topP: 0.9, // Reduced for faster generation
+        maxOutputTokens: 500, // Shorter responses = faster (2-3 paragraphs max)
       },
     });
 
